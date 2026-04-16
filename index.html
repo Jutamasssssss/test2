@@ -146,7 +146,7 @@
 <body>
 
 <script>
-  const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw6hWgv_m8GtK9ziZ4ws_aIFHxgiU6cF7E4U0O72Qbgr5MxRqJLt7l5PTbETsX_fVTpFw/exec";
+  const APPS_SCRIPT_URL = "YOUR_APPS_SCRIPT_WEB_APP_URL_HERE";
 </script>
 
 <!-- TERMS PAGE -->
@@ -203,7 +203,7 @@
         <div class="ts-body">
           <ol>
             <li>ต้องระบุวันลาชดเชย<strong>หลังจากวันหยุดราชการนั้นผ่านไปแล้ว</strong> และใช้สิทธิ์ภายใน <span class="ts-chip">2 เดือน</span> นับจากวันหยุดดังกล่าว</li>
-            <li>หากไม่สามารถใช้สิทธิ์ภายใน 2 เดือนได้ ต้องขออนุมัติจาก<strong>ผู้บังคับบัญชา</strong> พร้อมเหตุผลที่น่าเชื่อถือ</li>
+            <li>หากไม่สามารถใช้สิทธิ์ภายใน 2 เดือนได้ ต้องขออนุมัติจาก<strong>Manager หรือ Assistant Manager</strong> พร้อมเหตุผลที่น่าเชื่อถือ</li>
           </ol>
           <div class="ts-example"><strong>ตัวอย่าง:</strong> 13 ต.ค. 2568 เป็นวันหยุดราชการแต่ทำงาน สามารถขอชดเชยได้ตั้งแต่ 14 ต.ค. ถึง <strong>14 ธ.ค. 2568</strong> เท่านั้น</div>
         </div>
@@ -250,6 +250,7 @@
         <div class="form-group">
           <label>ทีม <span class="req">*</span></label>
           <select id="l-team" onchange="updateEmployees('l')">
+            <option value="" disabled>— เลือกทีม —</option>
             <option value="CMC">Commercial (CMC)</option>
             <option value="CS">Customer Service (CS)</option>
           </select>
@@ -267,6 +268,7 @@
         <div class="form-group full">
           <label>ประเภทการลา <span class="req">*</span></label>
           <select id="l-type" onchange="checkLeaveType()">
+            <option value="" disabled>— เลือกประเภทการลา —</option>
             <option value="sick">ลาป่วย</option>
             <option value="sickdoc">ลาป่วย – หมอนัด (มีเอกสารประกอบ)</option>
             <option value="personal">ลากิจ – ต้องแจ้งล่วงหน้า 7 วันทำการ</option>
@@ -286,12 +288,8 @@
           <label>จำนวนวันลา <span class="badge" id="l-days-badge"></span></label>
         </div>
         <div class="form-group hidden" id="comp-work-row">
-          <label>วันทำงานจริง (วันหยุดที่ทำงาน)</label>
+          <label>วันที่ทำงาน (วันหยุดที่เข้าทำงาน)</label>
           <input type="date" id="l-workdate">
-        </div>
-        <div class="form-group hidden" id="comp-use-row">
-          <label>วันหยุดที่จะใช้ทดแทน</label>
-          <input type="date" id="l-compdate">
         </div>
         <div class="form-group full" id="l-doc-row">
           <label>ไฟล์แนบหลักฐาน <span class="req" id="l-doc-req">*</span></label>
@@ -300,6 +298,10 @@
             <input type="file" id="l-file" style="display:none" accept="image/*,application/pdf">
           </div>
           <div class="upload-name" id="l-file-name"></div>
+          <div class="upload-success hidden" id="l-upload-ok">
+            <div class="upload-success-icon">✓</div>
+            <span id="l-upload-ok-text">อัปโหลดเรียบร้อยแล้ว</span>
+          </div>
         </div>
         <div class="form-group full">
           <label>หมายเหตุ</label>
@@ -310,13 +312,14 @@
       <div id="l-warn7" class="notice warn" style="display:none"><div class="notice-bar"></div><span id="l-warn7-text"></span></div>
       <div id="l-warn-doc" class="notice info" style="display:none"><div class="notice-bar"></div><span>การลาประเภทนี้ <strong>ต้องแนบเอกสารประกอบ</strong> ทุกครั้ง</span></div>
       <div id="l-warn-annual-nodoc" class="notice info" style="display:none"><div class="notice-bar"></div><span>ลาพักร้อนที่แจ้งล่วงหน้าครบ 7 วันทำการ <strong>ไม่จำเป็นต้องแนบไฟล์</strong></span></div>
-      <div id="l-warn-comp" class="notice info" style="display:none"><div class="notice-bar"></div><span>ลาชดเชยต้องใช้สิทธิ์<strong>ภายใน 2 เดือน</strong>หลังจากวันหยุดราชการ</span></div>
+      <div id="l-warn-comp" class="notice info" style="display:none"><div class="notice-bar"></div><span>ระบุวันที่ทำงานจริง (วันหยุดที่เข้ามาทำงาน) และวันที่ต้องการลาชดเชย — ต้องใช้สิทธิ์ <strong>ภายใน 2 เดือน</strong></span></div>
       <div id="l-err" class="notice err"><div class="notice-bar"></div><span id="l-err-text"></span></div>
       <div id="l-success" class="notice success"><div class="notice-bar"></div><span id="l-success-text"></span></div>
     </div>
 
     <div class="btn-row">
       <button class="btn" onclick="resetLeave()">ล้างข้อมูล</button>
+      <button class="btn" id="l-cancel-btn" onclick="cancelLeave()" style="display:none;color:#991B1B;border-color:#FCA5A5;">ยกเลิกคำขอ</button>
       <button class="btn primary" id="l-submit-btn" onclick="submitLeave()">
         <div class="spinner"></div><span class="btn-label">ยื่นคำขอลา</span>
       </button>
@@ -331,6 +334,7 @@
         <div class="form-group">
           <label>ทีม <span class="req">*</span></label>
           <select id="t-team" onchange="updateEmployees('t')">
+            <option value="" disabled>— เลือกทีม —</option>
             <option value="CMC">Commercial (CMC)</option>
             <option value="CS">Customer Service (CS)</option>
           </select>
@@ -349,13 +353,16 @@
           <input type="date" id="t-date">
         </div>
         <div style="visibility:hidden"></div>
-        <div class="form-group">
-          <label>เวลาเข้างาน (จริง) <span class="req">*</span></label>
-          <input type="time" id="t-in">
-        </div>
-        <div class="form-group">
-          <label>เวลาออกงาน (จริง) <span class="req">*</span></label>
-          <input type="time" id="t-out">
+        <div class="form-group full">
+          <label>กะการทำงาน <span class="req">*</span></label>
+          <select id="t-shift">
+            <option value="" disabled selected>— เลือกกะการทำงาน —</option>
+            <option value="08:00-17:00">กะเช้า 08:00 – 17:00 น.</option>
+            <option value="09:00-18:00">กะกลาง 09:00 – 18:00 น.</option>
+            <option value="11:00-20:00">กะบ่าย 11:00 – 20:00 น.</option>
+            <option value="12:00-21:00">กะดึก 12:00 – 21:00 น.</option>
+            <option value="13:00-22:00">กะ Event 13:00 – 22:00 น.</option>
+          </select>
         </div>
         <div class="form-group full">
           <label>ไฟล์แนบหลักฐาน <span class="req">*</span></label>
@@ -389,6 +396,7 @@
         <div class="form-group">
           <label>ทีม <span class="req">*</span></label>
           <select id="s-team" onchange="updateEmployees('s')">
+            <option value="" disabled>— เลือกทีม —</option>
             <option value="CMC">Commercial (CMC)</option>
             <option value="CS">Customer Service (CS)</option>
           </select>
@@ -408,18 +416,45 @@
 
 <script>
 const emp={
-  CMC:["จุฑามาศ ปราบท่าโพธิ์ (Blue)","ภทรกมล ถิระนันท์ (Mew)","ภาณุภาค ยังตรง (Nink)",
-       "อดิศร พรหมล้ำ (Sun)","ภูเมธ อริยธนกร (Tose)","เตชินท์ โคตรุด (Tay)",
-       "วรินญา หวานทอง (P)","ชญาพิมพ์ เสคมหฤทธิ์ (Mind)","ณัฐวี วงศ์ภักดี (Enjoy)",
-       "ปฐมาวดี โพธิ์ปุรม (Chompooh)","วรัมพร แก้วงอก (Ploy)","พิมพาดา ภิรมย์กน (Pim)",
-       "มาลิกา คำเอี่ยม (My)","กิ่งกาญจน์ กมลจิตร์ (Ging)","ณุชภัช การภักดี (Lit)",
-       "ชโนดม อินทร์ (Mind)","พัฒนฉัตร ชื่นเกษม (Smile)","ธนดล ควรพึ่ง (Book)",
-       "ธนพร บุญวงศ์ (Yee)","สิรินดา อ่องเอี่ยม (Jaikaew)","นารี ตั้งจิตชูบุญ (แต๊บ)"],
-  CS:["ปารมี เลิศภัทรจินดา (ปริ๊นเซส)","บุญล้อม โพนแก่น (ติ๊ก)","นงกรานต์ แซ่ลิ้ม (จีจี้)",
-      "เปรมยุดา คบหมู่ (ฟิว)","อรพินทร์ โภคาบุญเสริม (แก้ม)","ฐิติแข ดิษคำเหมาะ (เอิง)",
-      "เมธาวี หอมรื่น (ดรีม2)","นพวรรณ อินทรมะโรง (เจน)","วันวิสา คงทน (ฝ้าย)",
-      "ศศิประภา เกษมวงศ์ (แนน)","เกรียงไกร กำเหนิดนนท์ (บอย)","อมรรัตน์ ขอนสูงเนิน (เมย์)",
-      "อารียา สายธนู (ทิพย์)","ภานุวัฒน์ ทองพรหม (บาส)"]
+  CMC:[
+    "จุฑามาศ ปราบท่าโพธิ์ (Blue)",
+    "ภทรกมล ถิระนันท์ (Mew)",
+    "อดิศร พรหมล่ำ (Sun)",
+    "ภูเมธ อริยธนกร (Tose)",
+    "ปรามทัพ สอนโคตร (Game)",
+    "วรินญา หวานทอง (P)",
+    "ชญาพิมพ์ เลิศมหาฤทธิ์ (Mind)",
+    "ปฐมาวดี โพธิปฐม (Chompooh)",
+    "วรัมพร แก้วงอก (Ploy)",
+    "มาลิกา คำเอี่ยม (My)",
+    "กิ่งกาญจน์ กมลวิจิตร (Ging)",
+    "วุฒิชัย การภักดี (Lit)",
+    "ชโนดม อินทอง (Mind)",
+    "พัฒนฉัตร ชื่นเกษม (Smile)",
+    "ธนดล ควรพึ่ง (Book)",
+    "ธนพร บุญวงศ์ (Yee)",
+    "สิรินดา อ่องเอี่ยม (Jaikaew)",
+    "นารี ตั้งจิตชูบุญ (แต๊บ)",
+    "พรพิมล กองเพชร (อิ๋ง)",
+    "ณัฐรินทร์ ศรีปองพันธ์ (เนย)"
+  ],
+  CS:[
+    "ปารมี เลิศภัทรจินดา (ปริ๊นเซส)",
+    "เตชินท์ โคตรุด (Tay)",
+    "บุญล้อม โพนแก่น (ติ๊ก)",
+    "นงกรานต์ แซ่ลิ้ม (จีจี้)",
+    "เปรมยุดา คบหมู่ (ฟิว)",
+    "เมธาวี หอมรื่น (ดรีม2)",
+    "อรพินทร์ โภคาบุญเสริม (แก้ม)",
+    "ฐิติแข ดิษคำเหมาะ (เอิง)",
+    "นพวรรณ อินทรมะโรง (เจน)",
+    "วันวิสา คงทน (ฝ้าย)",
+    "ศศิประภา เกษมวงศ์ (แนน)",
+    "เกรียงไกร กำเหนิดนนท์ (บอย)",
+    "อมรรัตน์ ขอนสูงเนิน (เมย์)",
+    "อารียา สายธนู (ทิพย์)",
+    "ภานุวัฒน์ ทองพรหม (บาส)"
+  ]
 };
 const LEAVE_LABELS={sick:"ลาป่วย",sickdoc:"ลาป่วย-หมอนัด",personal:"ลากิจ",annual:"ลาพักร้อน",comp:"ลาหยุดชดเชย"};
 
@@ -432,7 +467,16 @@ function toggleHidden(id,h){document.getElementById(id).classList.toggle('hidden
 function showErr(p,t){const e=document.getElementById(p+'-err');document.getElementById(p+'-err-text').textContent=t;e.style.display='flex';}
 function hideErr(p){document.getElementById(p+'-err').style.display='none';}
 function setLoading(id,on){const b=document.getElementById(id);b.disabled=on;b.classList.toggle('loading',on);}
-function updateEmployees(f){const team=document.getElementById(f+'-team').value;const sel=document.getElementById(f+'-emp');sel.innerHTML=emp[team].map(n=>`<option>${n}</option>`).join('');}
+function updateEmployees(f){
+  const team=document.getElementById(f+'-team').value;
+  const sel=document.getElementById(f+'-emp');
+  if(!team){
+    sel.innerHTML='<option value="" disabled selected>— เลือกชื่อพนักงาน —</option>';
+    return;
+  }
+  const list = emp[team]||[];
+  sel.innerHTML='<option value="" disabled selected>— เลือกชื่อพนักงาน —</option>'+list.map(n=>`<option>${n}</option>`).join('');
+}
 function switchTab(type,btn){
   document.getElementById('form-leave').style.display=type==='leave'?'block':'none';
   document.getElementById('form-time').style.display=type==='time'?'block':'none';
@@ -478,7 +522,7 @@ function checkLeaveType(){
   showEl('l-warn-doc',needsDocInfo);
   showEl('l-warn-comp',t==='comp');
   toggleHidden('comp-work-row',t!=='comp');
-  toggleHidden('comp-use-row',t!=='comp');
+  
   updateDocRow();
   hideErr('l');
   document.getElementById('l-success').style.display='none';
@@ -501,17 +545,37 @@ async function fileToBase64(file){
   });
 }
 
+// ย่อขนาดรูปภาพ
+async function compressImage(file, maxWidth, quality){
+  return new Promise((resolve)=>{
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = ()=>{
+      const scale = Math.min(1, maxWidth/img.width);
+      const w = Math.round(img.width*scale);
+      const h = Math.round(img.height*scale);
+      const canvas = document.createElement('canvas');
+      canvas.width=w; canvas.height=h;
+      canvas.getContext('2d').drawImage(img,0,0,w,h);
+      canvas.toBlob((blob)=>{
+        URL.revokeObjectURL(url);
+        resolve(new File([blob], file.name, {type:'image/jpeg'}));
+      },'image/jpeg', quality);
+    };
+    img.src=url;
+  });
+}
+
 async function sendToSheet(payload){
-  // แนบไฟล์เป็น base64
-  const lFile=document.getElementById('l-file').files[0];
-  const tFile=document.getElementById('t-file').files[0];
-  const file = lFile||tFile;
+  // ใช้ไฟล์ที่ compress แล้ว (ถ้ามี) หรือไฟล์ต้นฉบับ
+  const lFile = window._lFileCompressed || document.getElementById('l-file').files[0];
+  const tFile = document.getElementById('t-file').files[0];
+  const file = lFile || tFile;
   if(file){
     payload.fileData=await fileToBase64(file);
     payload.fileName=file.name;
     payload.fileMime=file.type;
   }
-  // ใช้ no-cors เพื่อหลีกเลี่ยง CORS block — Apps Script รับได้ปกติ
   await fetch(APPS_SCRIPT_URL,{
     method:"POST",
     mode:"no-cors",
@@ -559,10 +623,15 @@ async function submitLeave(){
   setLoading('l-submit-btn',true);
   try{
     await sendToSheet(payload);
-    document.getElementById('l-success-text').innerHTML=`ยื่นคำขอ <strong>${LEAVE_LABELS[t]}</strong> ของ <strong>${empName}</strong> เรียบร้อยแล้ว — รอผู้บังคับบัญชาอนุมัติ`;
+    document.getElementById('l-success-text').innerHTML=`ยื่นคำขอ <strong>${LEAVE_LABELS[t]}</strong> ของ <strong>${empName}</strong> เรียบร้อยแล้ว — รอ Manager หรือ Assistant Manager อนุมัติ`;
     document.getElementById('l-success').style.display='flex';
     document.getElementById('l-success').scrollIntoView({behavior:'smooth',block:'center'});
-    setTimeout(()=>{ resetLeave(); }, 4000);
+    document.getElementById('l-cancel-btn').style.display='flex';
+    window._lFileCompressed = null;
+    setTimeout(()=>{
+      resetLeave();
+      document.getElementById('l-cancel-btn').style.display='none';
+    }, 8000);
   } catch(err){showErr('l','ส่งข้อมูลไม่สำเร็จ: '+err.message);}
   finally{setLoading('l-submit-btn',false);}
 }
@@ -570,18 +639,20 @@ async function submitLeave(){
 async function submitTime(){
   hideErr('t');document.getElementById('t-success').style.display='none';
   const d=document.getElementById('t-date').value;
-  const i=document.getElementById('t-in').value;
-  const o=document.getElementById('t-out').value;
+  const shift=document.getElementById('t-shift').value;
   const r=document.getElementById('t-remark').value.trim();
   const team=document.getElementById('t-team').value;
   const empName=document.getElementById('t-emp').value;
+  const i = shift ? shift.split('-')[0] : '';
+  const o = shift ? shift.split('-')[1] : '';
 
   if(!d){showErr('t','กรุณาเลือกวันที่ต้องการแก้ไข');return;}
-  if(!i||!o){showErr('t','กรุณาระบุเวลาเข้า-ออกงาน');return;}
+  if(!shift){showErr('t','กรุณาเลือกกะการทำงาน');return;}
   if(!r){showErr('t','กรุณาระบุเหตุผลการขอแก้ไขเวลา');return;}
 
+  const shiftLabel = document.getElementById('t-shift').options[document.getElementById('t-shift').selectedIndex].text;
   const payload={formType:"time",team,employeeName:empName,leaveType:"แก้ไขเวลา",
-    startDate:fmtDateShort(d),endDate:"",totalDays:`${i}–${o}`,workDate:"",compDate:"",remark:r};
+    startDate:fmtDateShort(d),endDate:"",totalDays:shiftLabel,workDate:"",compDate:"",remark:r};
 
   setLoading('t-submit-btn',true);
   try{
@@ -594,6 +665,17 @@ async function submitTime(){
   finally{setLoading('t-submit-btn',false);}
 }
 
+function cancelLeave(){
+  if(!confirm('ยืนยันการยกเลิกคำขอลานี้?')) return;
+  document.getElementById('l-cancel-btn').style.display='none';
+  resetLeave();
+  document.getElementById('l-success').style.display='none';
+  showErr('l','ยกเลิกคำขอลาเรียบร้อยแล้ว');
+  document.getElementById('l-err').style.background='#F0FDF4';
+  document.getElementById('l-err').style.borderColor='#86EFAC';
+  document.getElementById('l-err').style.color='#166534';
+}
+
 function resetLeave(){
   ['l-start','l-end','l-workdate','l-compdate','l-remark'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   document.getElementById('l-type').value='sick';
@@ -603,21 +685,46 @@ function resetLeave(){
   hideErr('l');checkLeaveType();
 }
 function resetTime(){
-  ['t-date','t-in','t-out','t-remark'].forEach(id=>{document.getElementById(id).value='';});
+  ['t-date','t-shift','t-remark'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   document.getElementById('t-file-name').textContent='';
   document.getElementById('t-file').value='';
   hideErr('t');
 }
 
-document.getElementById('l-file').addEventListener('change',function(){
-  document.getElementById('l-file-name').textContent=this.files[0]?'ไฟล์: '+this.files[0].name:'';
+document.getElementById('l-file').addEventListener('change', async function(){
+  const file = this.files[0];
+  if (!file) {
+    document.getElementById('l-file-name').textContent='';
+    document.getElementById('l-upload-ok').classList.add('hidden');
+    return;
+  }
+  document.getElementById('l-file-name').textContent='ไฟล์: '+file.name+' ('+Math.round(file.size/1024)+' KB)';
+  document.getElementById('l-upload-ok').classList.add('hidden');
+  // ถ้าเป็นรูปภาพ ย่อขนาดก่อน
+  if(file.type.startsWith('image/')){
+    document.getElementById('l-upload-ok-text').textContent='กำลังย่อขนาดรูป...';
+    document.getElementById('l-upload-ok').classList.remove('hidden');
+    const compressed = await compressImage(file, 1200, 0.75);
+    document.getElementById('l-file-compressed') && (document.getElementById('l-file-compressed').remove());
+    // store compressed
+    window._lFileCompressed = compressed;
+    const newSize = Math.round(compressed.size/1024);
+    document.getElementById('l-file-name').textContent='ไฟล์: '+file.name+' → '+newSize+' KB';
+    document.getElementById('l-upload-ok-text').textContent='ย่อขนาดเรียบร้อย พร้อมส่ง';
+  } else {
+    window._lFileCompressed = file;
+    document.getElementById('l-upload-ok-text').textContent='ไฟล์พร้อมส่งแล้ว';
+    document.getElementById('l-upload-ok').classList.remove('hidden');
+  }
 });
 document.getElementById('t-file').addEventListener('change',function(){
   document.getElementById('t-file-name').textContent=this.files[0]?'ไฟล์: '+this.files[0].name:'';
 });
 
 document.getElementById('topbar-date').textContent=new Date().toLocaleDateString('th-TH',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
-updateEmployees('l');updateEmployees('t');checkLeaveType();
+// init employee placeholders
+['l-emp','t-emp','s-emp'].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML='<option value="" disabled selected>— เลือกชื่อพนักงาน —</option>';});
+checkLeaveType();
 </script>
 </div><!-- /main-app -->
 
