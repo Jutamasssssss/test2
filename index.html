@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ระบบลางาน — Comseven</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --blue:#185FA5;--blue-dark:#0C447C;--blue-light:#EBF3FB;--blue-mid:#D0E5F7;
+    --warn-bg:#FFFBEB;--warn-border:#FCD34D;--warn-text:#92400E;
+    --info-bg:#EFF6FF;--info-border:#93C5FD;--info-text:#1E40AF;
+    --err-bg:#FEF2F2;--err-border:#FCA5A5;--err-text:#991B1B;
+    --success-bg:#F0FDF4;--success-border:#86EFAC;--success-text:#166534;
+    --bg:#F4F7FB;--card:#FFFFFF;--border:#E2E8F0;--border-light:#F1F5F9;
+    --text:#1E293B;--text-sec:#64748B;--text-ter:#94A3B8;
+    --radius:10px;--radius-sm:6px;
+    --shadow:0 1px 3px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.04);
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'IBM Plex Sans Thai',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:14px;line-height:1.5;}
+
+  .topbar{background:var(--blue);padding:0 24px;height:52px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(24,95,165,.3);}
+  .topbar-logo{width:28px;height:28px;background:rgba(255,255,255,.2);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:#fff;letter-spacing:.3px;}
+  .topbar-title{font-size:15px;font-weight:500;color:#fff;}
+  .topbar-sub{font-size:12px;color:rgba(255,255,255,.65);}
+  .topbar-date{margin-left:auto;font-size:12px;color:rgba(255,255,255,.75);}
+
+  .container{max-width:860px;margin:0 auto;padding:24px 16px 48px;}
+
+  .tab-wrap{display:flex;background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:20px;box-shadow:var(--shadow);}
+  .tab{flex:1;padding:11px 12px;font-size:13.5px;font-weight:500;cursor:pointer;border:none;background:transparent;color:var(--text-sec);border-right:1px solid var(--border);transition:all .18s;font-family:inherit;display:flex;align-items:center;justify-content:center;}
+  .tab:last-child{border-right:none;}
+  .tab.active{background:var(--blue);color:#fff;}
+  .tab:hover:not(.active){background:var(--blue-light);color:var(--blue);}
+
+  .card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:14px;box-shadow:var(--shadow);}
+  .card-header{display:flex;align-items:center;gap:10px;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--border-light);}
+  .card-dot{width:8px;height:8px;border-radius:50%;background:var(--blue);flex-shrink:0;}
+  .card-title{font-size:12px;font-weight:600;color:var(--text-sec);text-transform:uppercase;letter-spacing:.07em;}
+
+  .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  .full{grid-column:1/-1;}
+  .form-group{display:flex;flex-direction:column;gap:5px;}
+  label{font-size:12.5px;font-weight:500;color:var(--text-sec);}
+  label .req{color:#E53E3E;margin-left:2px;}
+  input[type=date],input[type=time],select,textarea{
+    width:100%;padding:8px 11px;border:1px solid var(--border);border-radius:var(--radius-sm);
+    font-size:13.5px;font-family:inherit;background:var(--card);color:var(--text);
+    transition:border-color .15s,box-shadow .15s;outline:none;-webkit-appearance:none;
+  }
+  input:focus,select:focus,textarea:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(24,95,165,.12);}
+  select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:30px;}
+  textarea{resize:vertical;min-height:72px;}
+
+  .badge{display:inline-flex;align-items:center;padding:2px 9px;border-radius:99px;font-size:11.5px;font-weight:600;margin-left:6px;background:var(--blue-light);color:var(--blue);}
+
+  .notice{border-radius:var(--radius-sm);padding:10px 14px;font-size:13px;display:flex;gap:10px;align-items:flex-start;margin-top:14px;line-height:1.6;}
+  .notice-bar{width:3px;border-radius:2px;flex-shrink:0;align-self:stretch;min-height:18px;}
+  .warn{background:var(--warn-bg);border:1px solid var(--warn-border);color:var(--warn-text);}
+  .warn .notice-bar{background:#F59E0B;}
+  .info{background:var(--info-bg);border:1px solid var(--info-border);color:var(--info-text);}
+  .info .notice-bar{background:#3B82F6;}
+  .err{background:var(--err-bg);border:1px solid var(--err-border);color:var(--err-text);display:none;}
+  .err .notice-bar{background:#EF4444;}
+  .success{background:var(--success-bg);border:1px solid var(--success-border);color:var(--success-text);display:none;}
+  .success .notice-bar{background:#22C55E;}
+
+  .upload-area{border:1.5px dashed var(--border);border-radius:var(--radius-sm);padding:18px 16px;text-align:center;font-size:13px;color:var(--text-ter);cursor:pointer;background:var(--bg);transition:border-color .15s,background .15s;}
+  .upload-area:hover{border-color:var(--blue);background:var(--blue-light);color:var(--blue);}
+  .upload-name{font-size:12px;color:var(--text-sec);margin-top:5px;}
+
+  .btn-row{display:flex;justify-content:flex-end;gap:8px;margin-top:4px;}
+  .btn{padding:9px 20px;border-radius:var(--radius-sm);font-size:13.5px;font-weight:500;cursor:pointer;border:1px solid var(--border);background:var(--card);color:var(--text-sec);font-family:inherit;transition:all .15s;}
+  .btn:hover{background:var(--bg);}
+  .btn.primary{background:var(--blue);color:#fff;border-color:var(--blue);display:flex;align-items:center;gap:6px;}
+  .btn.primary:hover{background:var(--blue-dark);}
+  .btn.primary:disabled{background:#94A3B8;border-color:#94A3B8;cursor:not-allowed;}
+  .spinner{width:14px;height:14px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;display:none;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+  .btn.loading .spinner{display:block;}
+  .btn.loading .btn-label{opacity:.7;}
+
+  .hidden{display:none!important;}
+
+  /* ── STATUS PAGE ── */
+  .status-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:14px;box-shadow:var(--shadow);}
+  .status-empty{text-align:center;padding:40px 20px;color:var(--text-ter);font-size:13.5px;}
+  .status-empty .empty-icon{font-size:36px;margin-bottom:10px;display:block;}
+  .leave-item{border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:10px;overflow:hidden;}
+  .leave-item-header{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--bg);border-bottom:1px solid var(--border-light);}
+  .leave-item-title{font-size:13.5px;font-weight:600;color:var(--text);}
+  .leave-item-date{font-size:12px;color:var(--text-ter);}
+  .leave-item-body{padding:12px 14px;display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+  .leave-item-body .lbl{font-size:11.5px;color:var(--text-ter);margin-bottom:2px;}
+  .leave-item-body .val{font-size:13px;color:var(--text);font-weight:500;}
+  .leave-item-body .full{grid-column:1/-1;}
+  .status-badge{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:99px;font-size:12px;font-weight:600;}
+  .badge-pending{background:#FFFBEB;color:#92400E;border:1px solid #FCD34D;}
+  .badge-approved{background:#BBF7D0;color:#166534;border:1px solid #86EFAC;}
+  .badge-rejected{background:#FECACA;color:#991B1B;border:1px solid #FCA5A5;}
+  .file-link{color:var(--blue);font-size:12.5px;text-decoration:none;font-weight:500;}
+  .file-link:hover{text-decoration:underline;}
+  .search-btn{width:100%;padding:10px;background:var(--blue);color:#fff;border:none;border-radius:var(--radius-sm);font-size:14px;font-weight:600;font-family:inherit;cursor:pointer;transition:background .15s;margin-top:4px;}
+  .search-btn:hover{background:var(--blue-dark);}
+  .search-btn:disabled{background:#94A3B8;cursor:not-allowed;}
+  .loading-text{text-align:center;padding:24px;color:var(--text-sec);font-size:13px;}
+  @media(max-width:560px){.form-grid{grid-template-columns:1fr;}.full{grid-column:1;}}
+
+  /* ── TERMS ── */
+  #terms-page{min-height:100vh;display:flex;flex-direction:column;}
+  .terms-container{max-width:720px;margin:0 auto;padding:28px 16px 48px;width:100%;}
+  .terms-hero{text-align:center;padding:28px 20px 20px;margin-bottom:20px;}
+  .terms-hero-mark{width:52px;height:52px;background:var(--blue);border-radius:12px;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;box-shadow:0 4px 14px rgba(24,95,165,.25);}
+  .terms-hero-mark svg{width:26px;height:26px;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+  .terms-hero h2{font-size:19px;font-weight:600;color:var(--text);margin-bottom:6px;}
+  .terms-hero p{font-size:13px;color:var(--text-sec);line-height:1.6;}
+  .terms-scroll{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);max-height:440px;overflow-y:auto;margin-bottom:16px;box-shadow:var(--shadow);}
+  .terms-scroll::-webkit-scrollbar{width:5px;}
+  .terms-scroll::-webkit-scrollbar-track{background:var(--bg);}
+  .terms-scroll::-webkit-scrollbar-thumb{background:#CBD5E1;border-radius:99px;}
+  .terms-section{padding:16px 20px;border-bottom:1px solid var(--border-light);}
+  .terms-section:last-child{border-bottom:none;}
+  .ts-header{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+  .ts-num{width:24px;height:24px;border-radius:6px;background:var(--blue);color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .ts-num.alt{background:var(--blue-light);color:var(--blue);}
+  .ts-title{font-size:13.5px;font-weight:600;color:var(--text);}
+  .ts-body{font-size:13px;color:var(--text-sec);line-height:1.75;padding-left:34px;}
+  .ts-body ol{padding-left:18px;}
+  .ts-body li{margin-bottom:6px;}
+  .ts-body strong{color:var(--text);font-weight:600;}
+  .ts-chip{display:inline-block;background:var(--blue-light);color:var(--blue-dark);border-radius:4px;padding:1px 7px;font-weight:600;font-size:12px;}
+  .ts-chip-red{display:inline-block;background:#FEF2F2;color:#991B1B;border-radius:4px;padding:1px 7px;font-weight:600;font-size:12px;}
+  .ts-example{margin-top:8px;padding:10px 12px;background:var(--blue-light);border-radius:6px;font-size:12.5px;color:var(--blue-dark);line-height:1.6;}
+  .scroll-hint{text-align:center;font-size:12px;color:var(--text-ter);margin-bottom:12px;}
+  .consent-bar{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px 20px;display:flex;flex-direction:column;gap:14px;box-shadow:var(--shadow);}
+  .consent-check{display:flex;align-items:flex-start;gap:10px;cursor:pointer;}
+  .consent-check input[type=checkbox]{width:17px;height:17px;margin-top:2px;flex-shrink:0;accent-color:var(--blue);cursor:pointer;}
+  .consent-check span{font-size:13.5px;color:var(--text);line-height:1.55;}
+  .consent-check span strong{color:var(--blue);}
+  .btn-accept{width:100%;padding:12px;background:var(--blue);color:#fff;border:none;border-radius:var(--radius-sm);font-size:14.5px;font-weight:600;font-family:inherit;cursor:pointer;transition:background .15s,opacity .15s;letter-spacing:.02em;}
+  .btn-accept:hover:not(:disabled){background:var(--blue-dark);}
+  .btn-accept:disabled{opacity:.35;cursor:not-allowed;}
+</style>
+</head>
+<body>
+
+<script>
+  const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw6hWgv_m8GtK9ziZ4ws_aIFHxgiU6cF7E4U0O72Qbgr5MxRqJLt7l5PTbETsX_fVTpFw/exec";
+</script>
+
+<!-- TERMS PAGE -->
+<div id="terms-page">
+  <div class="topbar">
+    <div class="topbar-logo">C7</div>
+    <span class="topbar-title">ระบบลางาน</span>
+    <span class="topbar-sub">— Comseven</span>
+    <span class="topbar-date" id="terms-date"></span>
+  </div>
+  <div class="terms-container">
+    <div class="terms-hero">
+      <div class="terms-hero-mark">
+        <svg viewBox="0 0 24 24"><path d="M9 12h6M9 16h6M13 4H6a2 2 0 00-2 2v14a2 2 0 002 2h12a2 2 0 002-2V9"/><path d="M13 4l5 5h-5V4z"/></svg>
+      </div>
+      <h2>Absence Request Form</h2>
+      <p>กรุณาอ่านและทำความเข้าใจเงื่อนไขการลาให้ครบถ้วนก่อนยื่นคำขอ<br>เอกสารนี้จัดทำขึ้นเพื่อใช้ภายในเท่านั้น</p>
+    </div>
+    <div class="scroll-hint">เลื่อนอ่านเงื่อนไขทั้งหมดก่อนกดยอมรับ</div>
+    <div class="terms-scroll">
+
+      <div class="terms-section">
+        <div class="ts-header"><div class="ts-num alt">01</div><div class="ts-title">การจัดตารางเวรทำงานรายเดือน</div></div>
+        <div class="ts-body">จะพิจารณาจากปริมาณงานและจำนวนบุคลากรเป็นหลัก เพื่อให้สอดคล้องและเกิดประสิทธิภาพสูงสุด</div>
+      </div>
+
+      <div class="terms-section">
+        <div class="ts-header"><div class="ts-num">02</div><div class="ts-title">ลากิจ / ลาพักร้อน / ลาป่วยล่วงหน้า (มีเอกสารประกอบ)</div></div>
+        <div class="ts-body">
+          <ol>
+            <li>ต้องแจ้งล่วงหน้าก่อนวันลาจริง — <strong>ลากิจ</strong>ต้องมีเอกสารประกอบเสมอ</li>
+            <li>ต้องได้รับ<strong>การอนุมัติก่อน</strong> จึงจะดำเนินการลาผ่านระบบ Prosoft ได้</li>
+            <li>เมื่อได้รับการอนุมัติแล้ว สามารถ Submit การลาผ่าน Prosoft ได้ทันที</li>
+            <li><span class="ts-chip">ลากิจ / ลาพักร้อน</span> ต้องแจ้งล่วงหน้าอย่างน้อย <span class="ts-chip">7 วันทำการ</span> — ลาพักร้อนที่อยู่ในเงื่อนไข <strong>ไม่ต้องแนบเอกสาร</strong></li>
+          </ol>
+        </div>
+      </div>
+
+      <div class="terms-section">
+        <div class="ts-header"><div class="ts-num">03</div><div class="ts-title">ลาป่วย (มีผลบังคับใช้ทันที)</div></div>
+        <div class="ts-body">
+          <ol>
+            <li>โทรแจ้งโดยตรง<strong>ล่วงหน้า 2 ชั่วโมง</strong>ก่อนเวลาเข้างาน<br>เช่น เข้างาน 09:00 น. ต้องแจ้งก่อน 07:00 น. / เข้างาน 12:00 น. ต้องแจ้งก่อน 10:00 น.</li>
+            <li>หากไม่รับสาย ให้ส่ง LINE ส่วนตัว พร้อม<strong>เก็บ Screenshot</strong> หลักฐานการติดต่อทั้งทางโทรศัพท์และ LINE</li>
+            <li>หากไม่มีหลักฐานที่น่าเชื่อถือ ถือว่าเป็น <span class="ts-chip-red">ขาดงาน</span> และไม่สามารถขอแก้ไขเวลาได้</li>
+            <li>แนบหลักฐานผ่านระบบ<strong>หลังกลับมาทำงานวันถัดไป</strong></li>
+            <li>ทุกครั้งที่ Submit ต้องแนบหลักฐาน หากไม่มีหลักฐาน คำขอถือเป็น <span class="ts-chip-red">โมฆะ</span> ไม่สามารถขอแก้ไขภายหลังได้</li>
+          </ol>
+        </div>
+      </div>
+
+      <div class="terms-section">
+        <div class="ts-header"><div class="ts-num">04</div><div class="ts-title">ลาหยุดชดเชยวันหยุดราชการ</div></div>
+        <div class="ts-body">
+          <ol>
+            <li>ต้องระบุวันลาชดเชย<strong>หลังจากวันหยุดราชการนั้นผ่านไปแล้ว</strong> และใช้สิทธิ์ภายใน <span class="ts-chip">2 เดือน</span> นับจากวันหยุดดังกล่าว</li>
+            <li>หากไม่สามารถใช้สิทธิ์ภายใน 2 เดือนได้ ต้องขออนุมัติจาก<strong>ผู้บังคับบัญชา</strong> พร้อมเหตุผลที่น่าเชื่อถือ</li>
+          </ol>
+          <div class="ts-example"><strong>ตัวอย่าง:</strong> 13 ต.ค. 2568 เป็นวันหยุดราชการแต่ทำงาน สามารถขอชดเชยได้ตั้งแต่ 14 ต.ค. ถึง <strong>14 ธ.ค. 2568</strong> เท่านั้น</div>
+        </div>
+      </div>
+
+      <div class="terms-section">
+        <div class="ts-header"><div class="ts-num alt">05</div><div class="ts-title">การลาอื่นๆ นอกเหนือเงื่อนไขข้างต้น</div></div>
+        <div class="ts-body">กรุณาติดต่อ <strong>Manager</strong> และ <strong>Assistant Manager</strong> โดยตรงเท่านั้น เพื่อพิจารณาความจำเป็นและขอรับการอนุมัติเป็นลายลักษณ์อักษร</div>
+      </div>
+
+    </div><!-- /terms-scroll -->
+
+    <div class="consent-bar">
+      <label class="consent-check">
+        <input type="checkbox" id="consent-cb" onchange="toggleAccept()">
+        <span>ข้าพเจ้าได้อ่านและ<strong>เข้าใจเงื่อนไขการขอลา</strong>ตามรายละเอียดข้างต้นทั้งหมดแล้ว และยินยอมปฏิบัติตามกฎดังกล่าว</span>
+      </label>
+      <button class="btn-accept" id="btn-accept" disabled onclick="acceptTerms()">ยอมรับและเข้าสู่ระบบลางาน</button>
+    </div>
+  </div>
+</div><!-- /terms-page -->
+
+<!-- MAIN APP -->
+<div id="main-app" style="display:none">
+<div class="topbar">
+  <div class="topbar-logo">C7</div>
+  <span class="topbar-title">ระบบลางาน</span>
+  <span class="topbar-sub">— Comseven</span>
+  <span class="topbar-date" id="topbar-date"></span>
+</div>
+
+<div class="container">
+  <div class="tab-wrap">
+    <button class="tab active" onclick="switchTab('leave',this)">ขออนุมัติลา</button>
+    <button class="tab" onclick="switchTab('time',this)">ขอแก้ไขเวลา</button>
+    <button class="tab" onclick="switchTab('status',this)">ตรวจสอบสถานะ</button>
+  </div>
+
+  <!-- LEAVE FORM -->
+  <div id="form-leave">
+    <div class="card">
+      <div class="card-header"><div class="card-dot"></div><span class="card-title">ข้อมูลผู้ยื่นคำร้อง</span></div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>ทีม <span class="req">*</span></label>
+          <select id="l-team" onchange="updateEmployees('l')">
+            <option value="CMC">Commercial (CMC)</option>
+            <option value="CS">Customer Service (CS)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>ชื่อพนักงาน <span class="req">*</span></label>
+          <select id="l-emp"></select>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><div class="card-dot"></div><span class="card-title">รายละเอียดการลา</span></div>
+      <div class="form-grid">
+        <div class="form-group full">
+          <label>ประเภทการลา <span class="req">*</span></label>
+          <select id="l-type" onchange="checkLeaveType()">
+            <option value="sick">ลาป่วย</option>
+            <option value="sickdoc">ลาป่วย – หมอนัด (มีเอกสารประกอบ)</option>
+            <option value="personal">ลากิจ – ต้องแจ้งล่วงหน้า 7 วันทำการ</option>
+            <option value="annual">ลาพักร้อน – ต้องแจ้งล่วงหน้า 7 วันทำการ</option>
+            <option value="comp">ลาหยุดชดเชยวันหยุดราชการ</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>วันที่เริ่มลา <span class="req">*</span></label>
+          <input type="date" id="l-start" onchange="calcLeaveDays()">
+        </div>
+        <div class="form-group">
+          <label>วันที่สิ้นสุดการลา <span class="req">*</span></label>
+          <input type="date" id="l-end" onchange="calcLeaveDays()">
+        </div>
+        <div class="form-group full" id="l-days-row" style="display:none">
+          <label>จำนวนวันลา <span class="badge" id="l-days-badge"></span></label>
+        </div>
+        <div class="form-group hidden" id="comp-work-row">
+          <label>วันทำงานจริง (วันหยุดที่ทำงาน)</label>
+          <input type="date" id="l-workdate">
+        </div>
+        <div class="form-group hidden" id="comp-use-row">
+          <label>วันหยุดที่จะใช้ทดแทน</label>
+          <input type="date" id="l-compdate">
+        </div>
+        <div class="form-group full" id="l-doc-row">
+          <label>ไฟล์แนบหลักฐาน <span class="req" id="l-doc-req">*</span></label>
+          <div class="upload-area" onclick="document.getElementById('l-file').click()">
+            แนบไฟล์ที่นี่ (รูปถ่าย / PDF)
+            <input type="file" id="l-file" style="display:none" accept="image/*,application/pdf">
+          </div>
+          <div class="upload-name" id="l-file-name"></div>
+        </div>
+        <div class="form-group full">
+          <label>หมายเหตุ</label>
+          <textarea id="l-remark" placeholder="ระบุรายละเอียดเพิ่มเติม (ถ้ามี)..."></textarea>
+        </div>
+      </div>
+
+      <div id="l-warn7" class="notice warn" style="display:none"><div class="notice-bar"></div><span id="l-warn7-text"></span></div>
+      <div id="l-warn-doc" class="notice info" style="display:none"><div class="notice-bar"></div><span>การลาประเภทนี้ <strong>ต้องแนบเอกสารประกอบ</strong> ทุกครั้ง</span></div>
+      <div id="l-warn-annual-nodoc" class="notice info" style="display:none"><div class="notice-bar"></div><span>ลาพักร้อนที่แจ้งล่วงหน้าครบ 7 วันทำการ <strong>ไม่จำเป็นต้องแนบไฟล์</strong></span></div>
+      <div id="l-warn-comp" class="notice info" style="display:none"><div class="notice-bar"></div><span>ลาชดเชยต้องใช้สิทธิ์<strong>ภายใน 2 เดือน</strong>หลังจากวันหยุดราชการ</span></div>
+      <div id="l-err" class="notice err"><div class="notice-bar"></div><span id="l-err-text"></span></div>
+      <div id="l-success" class="notice success"><div class="notice-bar"></div><span id="l-success-text"></span></div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn" onclick="resetLeave()">ล้างข้อมูล</button>
+      <button class="btn primary" id="l-submit-btn" onclick="submitLeave()">
+        <div class="spinner"></div><span class="btn-label">ยื่นคำขอลา</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- TIME FORM -->
+  <div id="form-time" style="display:none">
+    <div class="card">
+      <div class="card-header"><div class="card-dot"></div><span class="card-title">ข้อมูลผู้ยื่นคำร้อง</span></div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>ทีม <span class="req">*</span></label>
+          <select id="t-team" onchange="updateEmployees('t')">
+            <option value="CMC">Commercial (CMC)</option>
+            <option value="CS">Customer Service (CS)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>ชื่อพนักงาน <span class="req">*</span></label>
+          <select id="t-emp"></select>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header"><div class="card-dot"></div><span class="card-title">รายละเอียดการขอแก้ไขเวลา</span></div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>วันที่ต้องการแก้ไข <span class="req">*</span></label>
+          <input type="date" id="t-date">
+        </div>
+        <div style="visibility:hidden"></div>
+        <div class="form-group">
+          <label>เวลาเข้างาน (จริง) <span class="req">*</span></label>
+          <input type="time" id="t-in">
+        </div>
+        <div class="form-group">
+          <label>เวลาออกงาน (จริง) <span class="req">*</span></label>
+          <input type="time" id="t-out">
+        </div>
+        <div class="form-group full">
+          <label>ไฟล์แนบหลักฐาน <span class="req">*</span></label>
+          <div class="upload-area" onclick="document.getElementById('t-file').click()">
+            แนบไฟล์ที่นี่ (รูปถ่าย / PDF)
+            <input type="file" id="t-file" style="display:none" accept="image/*,application/pdf">
+          </div>
+          <div class="upload-name" id="t-file-name"></div>
+        </div>
+        <div class="form-group full">
+          <label>เหตุผล / หมายเหตุ <span class="req">*</span></label>
+          <textarea id="t-remark" placeholder="ระบุเหตุผลที่ต้องการแก้ไขเวลา..."></textarea>
+        </div>
+      </div>
+      <div id="t-err" class="notice err"><div class="notice-bar"></div><span id="t-err-text"></span></div>
+      <div id="t-success" class="notice success"><div class="notice-bar"></div><span id="t-success-text"></span></div>
+    </div>
+    <div class="btn-row">
+      <button class="btn" onclick="resetTime()">ล้างข้อมูล</button>
+      <button class="btn primary" id="t-submit-btn" onclick="submitTime()">
+        <div class="spinner"></div><span class="btn-label">ยื่นคำขอแก้ไขเวลา</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- STATUS FORM -->
+  <div id="form-status" style="display:none">
+    <div class="status-card">
+      <div class="card-header"><div class="card-dot"></div><span class="card-title">ตรวจสอบสถานะการลา</span></div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>ทีม <span class="req">*</span></label>
+          <select id="s-team" onchange="updateEmployees('s')">
+            <option value="CMC">Commercial (CMC)</option>
+            <option value="CS">Customer Service (CS)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>ชื่อพนักงาน <span class="req">*</span></label>
+          <select id="s-emp"></select>
+        </div>
+      </div>
+      <button class="search-btn" id="s-search-btn" onclick="searchStatus()">ตรวจสอบสถานะ</button>
+    </div>
+
+    <div id="s-result"></div>
+  </div>
+
+</div><!-- /container -->
+
+<script>
+const emp={
+  CMC:["จุฑามาศ ปราบท่าโพธิ์ (Blue)","ภทรกมล ถิระนันท์ (Mew)","ภาณุภาค ยังตรง (Nink)",
+       "อดิศร พรหมล้ำ (Sun)","ภูเมธ อริยธนกร (Tose)","เตชินท์ โคตรุด (Tay)",
+       "วรินญา หวานทอง (P)","ชญาพิมพ์ เสคมหฤทธิ์ (Mind)","ณัฐวี วงศ์ภักดี (Enjoy)",
+       "ปฐมาวดี โพธิ์ปุรม (Chompooh)","วรัมพร แก้วงอก (Ploy)","พิมพาดา ภิรมย์กน (Pim)",
+       "มาลิกา คำเอี่ยม (My)","กิ่งกาญจน์ กมลจิตร์ (Ging)","ณุชภัช การภักดี (Lit)",
+       "ชโนดม อินทร์ (Mind)","พัฒนฉัตร ชื่นเกษม (Smile)","ธนดล ควรพึ่ง (Book)",
+       "ธนพร บุญวงศ์ (Yee)","สิรินดา อ่องเอี่ยม (Jaikaew)","นารี ตั้งจิตชูบุญ (แต๊บ)"],
+  CS:["ปารมี เลิศภัทรจินดา (ปริ๊นเซส)","บุญล้อม โพนแก่น (ติ๊ก)","นงกรานต์ แซ่ลิ้ม (จีจี้)",
+      "เปรมยุดา คบหมู่ (ฟิว)","อรพินทร์ โภคาบุญเสริม (แก้ม)","ฐิติแข ดิษคำเหมาะ (เอิง)",
+      "เมธาวี หอมรื่น (ดรีม2)","นพวรรณ อินทรมะโรง (เจน)","วันวิสา คงทน (ฝ้าย)",
+      "ศศิประภา เกษมวงศ์ (แนน)","เกรียงไกร กำเหนิดนนท์ (บอย)","อมรรัตน์ ขอนสูงเนิน (เมย์)",
+      "อารียา สายธนู (ทิพย์)","ภานุวัฒน์ ทองพรหม (บาส)"]
+};
+const LEAVE_LABELS={sick:"ลาป่วย",sickdoc:"ลาป่วย-หมอนัด",personal:"ลากิจ",annual:"ลาพักร้อน",comp:"ลาหยุดชดเชย"};
+
+function calcEarliestDate(n){let biz=0,d=new Date();d.setHours(0,0,0,0);while(biz<n){d.setDate(d.getDate()+1);if(d.getDay()!==0&&d.getDay()!==6)biz++;}return d;}
+function countBizDays(from,to){let biz=0,d=new Date(from);d.setHours(0,0,0,0);const end=new Date(to);end.setHours(0,0,0,0);while(d<end){d.setDate(d.getDate()+1);if(d.getDay()!==0&&d.getDay()!==6)biz++;}return biz;}
+function fmtDate(d){return d.toLocaleDateString('th-TH',{day:'numeric',month:'long',year:'numeric'});}
+function fmtDateShort(str){return new Date(str).toLocaleDateString('th-TH',{day:'numeric',month:'short',year:'numeric'});}
+function showEl(id,v){document.getElementById(id).style.display=v?'flex':'none';}
+function toggleHidden(id,h){document.getElementById(id).classList.toggle('hidden',h);}
+function showErr(p,t){const e=document.getElementById(p+'-err');document.getElementById(p+'-err-text').textContent=t;e.style.display='flex';}
+function hideErr(p){document.getElementById(p+'-err').style.display='none';}
+function setLoading(id,on){const b=document.getElementById(id);b.disabled=on;b.classList.toggle('loading',on);}
+function updateEmployees(f){const team=document.getElementById(f+'-team').value;const sel=document.getElementById(f+'-emp');sel.innerHTML=emp[team].map(n=>`<option>${n}</option>`).join('');}
+function switchTab(type,btn){
+  document.getElementById('form-leave').style.display=type==='leave'?'block':'none';
+  document.getElementById('form-time').style.display=type==='time'?'block':'none';
+  document.getElementById('form-status').style.display=type==='status'?'block':'none';
+  document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  if(type==='status') updateEmployees('s');
+}
+
+function isAnnualWith7Days(){
+  const t=document.getElementById('l-type').value;
+  const s=document.getElementById('l-start').value;
+  if(t!=='annual'||!s)return false;
+  const today=new Date();today.setHours(0,0,0,0);
+  const start=new Date(s);start.setHours(0,0,0,0);
+  return countBizDays(today,start)>=7;
+}
+
+function updateDocRow(){
+  const t=document.getElementById('l-type').value;
+  const annualOk=isAnnualWith7Days();
+  if(t==='annual'&&annualOk){
+    toggleHidden('l-doc-row',true);
+    showEl('l-warn-annual-nodoc',true);
+    document.getElementById('l-doc-req').style.display='none';
+  } else {
+    toggleHidden('l-doc-row',false);
+    showEl('l-warn-annual-nodoc',false);
+    document.getElementById('l-doc-req').style.display='';
+  }
+}
+
+function checkLeaveType(){
+  const t=document.getElementById('l-type').value;
+  const needs7=t==='personal'||t==='annual';
+  if(needs7){
+    const earliest=calcEarliestDate(7);
+    const label=t==='annual'?'ลาพักร้อน':'ลากิจ';
+    document.getElementById('l-warn7-text').innerHTML=`<strong>${label}</strong> ต้องแจ้งล่วงหน้าอย่างน้อย <strong>7 วันทำการ</strong> — วันที่เร็วที่สุดที่เริ่มลาได้คือ <strong>${fmtDate(earliest)}</strong>`;
+    showEl('l-warn7',true);
+  } else {showEl('l-warn7',false);}
+  const needsDocInfo=t==='sick'||t==='sickdoc'||t==='personal'||t==='comp';
+  showEl('l-warn-doc',needsDocInfo);
+  showEl('l-warn-comp',t==='comp');
+  toggleHidden('comp-work-row',t!=='comp');
+  toggleHidden('comp-use-row',t!=='comp');
+  updateDocRow();
+  hideErr('l');
+  document.getElementById('l-success').style.display='none';
+  calcLeaveDays();
+}
+
+function calcLeaveDays(){
+  const s=document.getElementById('l-start').value,e=document.getElementById('l-end').value;
+  const row=document.getElementById('l-days-row'),badge=document.getElementById('l-days-badge');
+  if(s&&e){const d=Math.round((new Date(e)-new Date(s))/86400000)+1;if(d>0){row.style.display='block';badge.textContent=d+' วัน';updateDocRow();return;}}
+  row.style.display='none';updateDocRow();
+}
+
+async function fileToBase64(file){
+  return new Promise((resolve,reject)=>{
+    const reader=new FileReader();
+    reader.onload=()=>resolve(reader.result.split(',')[1]);
+    reader.onerror=reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+async function sendToSheet(payload){
+  // แนบไฟล์เป็น base64
+  const lFile=document.getElementById('l-file').files[0];
+  const tFile=document.getElementById('t-file').files[0];
+  const file = lFile||tFile;
+  if(file){
+    payload.fileData=await fileToBase64(file);
+    payload.fileName=file.name;
+    payload.fileMime=file.type;
+  }
+  // ใช้ no-cors เพื่อหลีกเลี่ยง CORS block — Apps Script รับได้ปกติ
+  await fetch(APPS_SCRIPT_URL,{
+    method:"POST",
+    mode:"no-cors",
+    headers:{"Content-Type":"text/plain"},
+    body:JSON.stringify(payload)
+  });
+  return {status:"ok"};
+}
+
+async function submitLeave(){
+  hideErr('l');document.getElementById('l-success').style.display='none';
+  const t=document.getElementById('l-type').value;
+  const s=document.getElementById('l-start').value;
+  const e=document.getElementById('l-end').value;
+  const team=document.getElementById('l-team').value;
+  const empName=document.getElementById('l-emp').value;
+
+  if(!s||!e){showErr('l','กรุณาเลือกวันที่เริ่มและสิ้นสุดการลา');return;}
+  const start=new Date(s);start.setHours(0,0,0,0);
+  const end=new Date(e);end.setHours(0,0,0,0);
+  if(end<start){showErr('l','วันสิ้นสุดต้องไม่น้อยกว่าวันที่เริ่มลา');return;}
+
+  if(t==='personal'||t==='annual'){
+    const today=new Date();today.setHours(0,0,0,0);
+    if(countBizDays(today,start)<7){
+      const earliest=calcEarliestDate(7);
+      const label=t==='annual'?'ลาพักร้อน':'ลากิจ';
+      showErr('l',`${label} ต้องแจ้งล่วงหน้าอย่างน้อย 7 วันทำการ — วันที่เร็วที่สุดคือ ${fmtDate(earliest)}`);
+      return;
+    }
+  }
+
+  const annualOk=isAnnualWith7Days();
+  const fileRequired=!(t==='annual'&&annualOk);
+  const file=document.getElementById('l-file').files[0];
+  if(fileRequired&&!file){showErr('l','กรุณาแนบไฟล์หลักฐานประกอบการลา');return;}
+
+  const totalDays=Math.round((end-start)/86400000)+1;
+  const payload={formType:"leave",team,employeeName:empName,leaveType:LEAVE_LABELS[t]||t,
+    startDate:fmtDateShort(s),endDate:fmtDateShort(e),totalDays,
+    workDate:document.getElementById('l-workdate').value?fmtDateShort(document.getElementById('l-workdate').value):"",
+    compDate:document.getElementById('l-compdate').value?fmtDateShort(document.getElementById('l-compdate').value):"",
+    remark:document.getElementById('l-remark').value.trim()};
+
+  setLoading('l-submit-btn',true);
+  try{
+    await sendToSheet(payload);
+    document.getElementById('l-success-text').innerHTML=`ยื่นคำขอ <strong>${LEAVE_LABELS[t]}</strong> ของ <strong>${empName}</strong> เรียบร้อยแล้ว — รอผู้บังคับบัญชาอนุมัติ`;
+    document.getElementById('l-success').style.display='flex';
+    document.getElementById('l-success').scrollIntoView({behavior:'smooth',block:'center'});
+    setTimeout(()=>{ resetLeave(); }, 4000);
+  } catch(err){showErr('l','ส่งข้อมูลไม่สำเร็จ: '+err.message);}
+  finally{setLoading('l-submit-btn',false);}
+}
+
+async function submitTime(){
+  hideErr('t');document.getElementById('t-success').style.display='none';
+  const d=document.getElementById('t-date').value;
+  const i=document.getElementById('t-in').value;
+  const o=document.getElementById('t-out').value;
+  const r=document.getElementById('t-remark').value.trim();
+  const team=document.getElementById('t-team').value;
+  const empName=document.getElementById('t-emp').value;
+
+  if(!d){showErr('t','กรุณาเลือกวันที่ต้องการแก้ไข');return;}
+  if(!i||!o){showErr('t','กรุณาระบุเวลาเข้า-ออกงาน');return;}
+  if(!r){showErr('t','กรุณาระบุเหตุผลการขอแก้ไขเวลา');return;}
+
+  const payload={formType:"time",team,employeeName:empName,leaveType:"แก้ไขเวลา",
+    startDate:fmtDateShort(d),endDate:"",totalDays:`${i}–${o}`,workDate:"",compDate:"",remark:r};
+
+  setLoading('t-submit-btn',true);
+  try{
+    await sendToSheet(payload);
+    document.getElementById('t-success-text').innerHTML=`ยื่นคำขอแก้ไขเวลาของ <strong>${empName}</strong> วันที่ ${fmtDateShort(d)} เรียบร้อยแล้ว`;
+    document.getElementById('t-success').style.display='flex';
+    document.getElementById('t-success').scrollIntoView({behavior:'smooth',block:'center'});
+    setTimeout(()=>{ resetTime(); }, 4000);
+  } catch(err){showErr('t','ส่งข้อมูลไม่สำเร็จ: '+err.message);}
+  finally{setLoading('t-submit-btn',false);}
+}
+
+function resetLeave(){
+  ['l-start','l-end','l-workdate','l-compdate','l-remark'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  document.getElementById('l-type').value='sick';
+  document.getElementById('l-days-row').style.display='none';
+  document.getElementById('l-file-name').textContent='';
+  document.getElementById('l-file').value='';
+  hideErr('l');checkLeaveType();
+}
+function resetTime(){
+  ['t-date','t-in','t-out','t-remark'].forEach(id=>{document.getElementById(id).value='';});
+  document.getElementById('t-file-name').textContent='';
+  document.getElementById('t-file').value='';
+  hideErr('t');
+}
+
+document.getElementById('l-file').addEventListener('change',function(){
+  document.getElementById('l-file-name').textContent=this.files[0]?'ไฟล์: '+this.files[0].name:'';
+});
+document.getElementById('t-file').addEventListener('change',function(){
+  document.getElementById('t-file-name').textContent=this.files[0]?'ไฟล์: '+this.files[0].name:'';
+});
+
+document.getElementById('topbar-date').textContent=new Date().toLocaleDateString('th-TH',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+updateEmployees('l');updateEmployees('t');checkLeaveType();
+</script>
+</div><!-- /main-app -->
+
+<script>
+
+/* --- SEARCH STATUS --- */
+async function searchStatus(){
+  const team=document.getElementById('s-team').value;
+  const name=document.getElementById('s-emp').value;
+  const btn=document.getElementById('s-search-btn');
+  const resultDiv=document.getElementById('s-result');
+  btn.disabled=true; btn.textContent='กำลังโหลด...';
+  resultDiv.innerHTML='<div class="loading-text">กำลังดึงข้อมูล...</div>';
+  try{
+    const url=APPS_SCRIPT_URL+'?action=checkStatus&team='+encodeURIComponent(team)+'&name='+encodeURIComponent(name);
+    const res=await fetch(url);
+    const json=await res.json();
+    if(json.status!=='ok') throw new Error(json.message);
+    const data=json.data||[];
+    if(data.length===0){
+      resultDiv.innerHTML='<div class="status-empty"><span class="empty-icon">&#128203;</span>ไม่พบประวัติการลาของ <strong>'+name+'</strong></div>';
+      return;
+    }
+    let html='';
+    data.forEach(function(r){
+      const bc=r.status==='อนุมัติแล้ว'?'badge-approved':r.status==='ไม่อนุมัติ'?'badge-rejected':'badge-pending';
+      const st=r.status||'รอดำเนินการ';
+      const fh=r.fileUrl&&r.fileUrl.startsWith('http')?'<a class="file-link" href="'+r.fileUrl+'" target="_blank">ดูไฟล์แนบ</a>':'ไม่มีไฟล์';
+      const ah=r.approver?(r.approver+(r.approveDate?' ('+r.approveDate+')':'')):'-';
+      const mh=r.managerNote||'-';
+      html+='<div class="leave-item">'+
+        '<div class="leave-item-header">'+
+          '<div><div class="leave-item-title">'+r.leaveType+'</div><div class="leave-item-date">ยื่นเมื่อ '+r.timestamp+'</div></div>'+
+          '<span class="status-badge '+bc+'">'+st+'</span>'+
+        '</div>'+
+        '<div class="leave-item-body">'+
+          '<div><div class="lbl">วันที่เริ่มลา</div><div class="val">'+(r.startDate||'-')+'</div></div>'+
+          '<div><div class="lbl">วันที่สิ้นสุด</div><div class="val">'+(r.endDate||'-')+'</div></div>'+
+          '<div><div class="lbl">จำนวนวัน</div><div class="val">'+(r.totalDays||'-')+'</div></div>'+
+          '<div><div class="lbl">ไฟล์แนบ</div><div class="val">'+fh+'</div></div>'+
+          '<div class="full"><div class="lbl">ผู้อนุมัติ</div><div class="val">'+ah+'</div></div>'+
+          '<div class="full"><div class="lbl">หมายเหตุ Manager</div><div class="val">'+mh+'</div></div>'+
+        '</div></div>';
+    });
+    resultDiv.innerHTML=html;
+  }catch(err){
+    resultDiv.innerHTML='<div class="status-empty">เกิดข้อผิดพลาด: '+err.message+'</div>';
+  }finally{
+    btn.disabled=false; btn.textContent='ตรวจสอบสถานะ';
+  }
+}
+
+document.getElementById('terms-date').textContent=new Date().toLocaleDateString('th-TH',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+function toggleAccept(){document.getElementById('btn-accept').disabled=!document.getElementById('consent-cb').checked;}
+function acceptTerms(){document.getElementById('terms-page').style.display='none';document.getElementById('main-app').style.display='block';window.scrollTo(0,0);}
+</script>
+</body>
+</html>
